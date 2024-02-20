@@ -1,13 +1,14 @@
- const express = require('express');
+const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
-const app = express();
+const serverless = require('serverless-http');
 
-app.use(express.json());
+const app = express();
+const router = express.Router();
 
 app.use(cors());
 
-app.get('/places', async (req, res) => {
+router.get('/places', async (req, res) => {
   try {
       const response = await axios.get('https://maps.googleapis.com/maps/api/place/autocomplete/json', {
         params: req.query,
@@ -19,7 +20,7 @@ app.get('/places', async (req, res) => {
     }
 });
 
-app.get('/details', async (req, res) => {
+router.get('/details', async (req, res) => {
     try {
         const response = await axios.get('https://maps.googleapis.com/maps/api/place/details/json', {
           params: req.query,
@@ -31,6 +32,7 @@ app.get('/details', async (req, res) => {
       }
   });
 
-app.listen(8080, () => {
+app.use('/.netlify/functions/server', router);
 
-});
+module.exports = app;
+module.exports.handler = serverless(app);
